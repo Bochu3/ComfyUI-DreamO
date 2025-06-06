@@ -139,6 +139,8 @@ def dreamo_forward(self, x, timestep, context, y, guidance=None, control=None, t
             ref_h_len = ref_cond.shape[2] // patch_size
             ref_w_len = ref_cond.shape[3] // patch_size
             ref_img = rearrange(ref_cond, "b c (h ph) (w pw) -> b (h w) (c ph pw)", ph=patch_size, pw=patch_size)
+            if img.shape[0] > 1 and ref_img.shape[0] == 1:
+                ref_img = ref_img.expand(img.shape[0], -1, -1)
             ref_img_ids = torch.zeros((ref_h_len, ref_w_len, 3), device=x.device, dtype=x.dtype)
             ref_img_ids[:, :, 1] = ref_img_ids[:, :, 1] + torch.linspace(cum_h_len, cum_h_len + ref_h_len - 1, steps=ref_h_len, device=x.device, dtype=x.dtype).unsqueeze(1)
             ref_img_ids[:, :, 2] = ref_img_ids[:, :, 2] + torch.linspace(cum_w_len, cum_w_len + ref_w_len - 1, steps=ref_w_len, device=x.device, dtype=x.dtype).unsqueeze(0)
